@@ -3,18 +3,22 @@ import mongoose from 'mongoose';
 mongoose.Promise = global.Promise;
 
 const trackSchema = new mongoose.Schema({
-	_id: mongoose.Schema.Types.ObjectId,
-	url: {
+	// _id: mongoose.Schema.Types.ObjectId,
+	_id : {
 		type: String,
+		required: true
 	},
 	trackType : {
 		type: String,
+		// required : true
 	},
 	title: {
 		type: String,
+		required : true
 	},
 	artist: {
 		type: String,
+		required : true
 	},
 	album: {
 		type: String,
@@ -25,10 +29,6 @@ const trackSchema = new mongoose.Schema({
 	date: {
 		type: String,
 	},
-	playList : [{
-		type: mongoose.Schema.Types.ObjectId,
-		ref : "Playlist"
-	}]
 });
 
 const Track = mongoose.model('Track', trackSchema);

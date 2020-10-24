@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs';
 import Axios from 'axios';
 import multer from 'multer';
 import { Readable } from 'stream';
+import Track from './../models/Track.js';
+import Playlist from '../models/Playlist.js';
 const ObjectID = mongoose.mongo.ObjectID;
 const database = mongoose.connection;
 
@@ -38,15 +40,16 @@ export async function openTrack(req, res) {
 
 export async function postTrack(req, res) {
 	const storage = multer.memoryStorage()
-	const upload = multer({ storage: storage, limits: { fields: 1, fileSize: 6000000, files: 1, parts: 2 } });
+	const upload = multer({ storage: storage, limits: { fileSize: 6000000, files: 1 } });
 	upload.single('Track')(req, res, (err) => {
 		if (err) {
+			console.log('error', err);
 			return res.status(400).json({ message: "Upload Request Validation Failed" });
-		} else if (!req.body.name) {
+		} else if (!req.body.title) {
 			return res.status(400).json({ message: "No track name in request body" });
 		}
 
-		let trackName = req.body.name;
+		let trackName = req.body.title;
 
 		// Covert buffer to Readable Stream
 		const readableTrackStream = new Readable();
@@ -66,8 +69,87 @@ export async function postTrack(req, res) {
 		});
 
 		uploadStream.on('finish', () => {
-			return res.status(201).json({ message: "File uploaded successfully, stored under Mongo ObjectID: " + id });
+			const track = new Track({
+				_id: id,
+				title: req.body.title,
+				artist: req.body.artist
+			});
+			return track
+				.save()
+				.then(async function (newTrack) {
+					return res.status(201).json({
+						success: true,
+						message: 'New track created successfully',
+						track: newTrack,
+					});
+				})
+				.catch((error) => {
+					console.log(error);
+					res.status(500).json({
+						success: false,
+						message: 'Server error. Please try again.',
+						error: error.message,
+						loggedIn: false
+					});
+				});
 		});
+
 	});
 	// console.log('db', db);
+}
+
+export async function getAllTracks(req, res) {
+	Track.find()
+		.select('_id title artist album genre date playlist')
+		.then((allTracks) => {
+			return res.status(200).json({
+				success: true,
+				message: 'A list of all tracks',
+				tracks: allTracks,
+			});
+		})
+		.catch((err) => {
+			res.status(500).json({
+				success: false,
+				message: 'Server error. Please try again.',
+				error: err.message,
+			});
+		});
+}
+export async function addTrackToPlaylist(req, res) {
+	try {
+		const track = await Track.findOne({ _id: req.body.trackId })
+		const playlist = await Playlist.findOne({ _id: req.body.playlistId })
+		if (!playlist) {
+			res.status(404).json({
+				success: false,
+				message: 'no playlist found'
+			})
+		} else {
+			playlist.trackList.push(track)
+			await playlist.save()
+				.then(async function (newPlaylist) {
+					return res.status(201).json({
+						success: true,
+						message: ' playlist updated successfully',
+						playlist: newPlaylist,
+					});
+				})
+				.catch((error) => {
+					console.log(error);
+					res.status(500).json({
+						success: false,
+						message: 'Server error. Please try again.',
+						error: error.message,
+					});
+				});
+		}
+	}
+	catch (error) {
+		res.status(500).json({
+			success: false,
+			message: 'Server error. Please try again.',
+			error: error.message,
+		})
+	}
 }

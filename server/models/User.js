@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import PlayLists from './Playlist.js';
 
 
 mongoose.Promise = global.Promise;
@@ -21,7 +22,10 @@ const userSchema = new mongoose.Schema({
 	facebookId: {
 		type: String,
 	},
-
+	playlist : [{
+		type: mongoose.Schema.Types.ObjectId,
+		ref : 'PLaylist'
+	}],
 	tokens: [{
 		token: {
 			type: String,

@@ -1,4 +1,7 @@
 import mongoose from 'mongoose';
+import User from './User.js'
+import Track from './Track.js'
+
 
 mongoose.Promise = global.Promise;
 
@@ -7,12 +10,13 @@ const playlistSchema = new mongoose.Schema({
 	playlistName: {
 		type: String,
 	},
-	userPassword: {
-		type: String,
-	},
-	songList : [{
+	userId: {
 		type: mongoose.Schema.Types.ObjectId,
-		ref : "Track"
+		ref : "User"
+	},
+	trackList: [{
+		type: mongoose.Schema.Types.ObjectId,
+		ref: "Track"
 	}]
 });
 

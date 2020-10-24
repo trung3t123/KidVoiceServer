@@ -91,7 +91,7 @@ export async function loginUser(req, res) {
 
 export function getAllUser(req, res) {
 	User.find()
-		.select('_id userName facebookId userPassword userMail tokens')
+		.select('_id userName facebookId userPassword playlist userMail tokens')
 		.then((allUser) => {
 			return res.status(200).json({
 				success: true,
