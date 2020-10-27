@@ -119,7 +119,7 @@ export async function getAllTracks(req, res) {
 export async function addTrackToPlaylist(req, res) {
 	try {
 		const track = await Track.findOne({ _id: req.body.trackId })
-		const playlist = await Playlist.findOne({ _id: req.body.playlistId })
+		const playlist = await Playlist.findOne({ _id: req.body.playlistId }).populate('trackList')
 		if (!playlist) {
 			res.status(404).json({
 				success: false,
@@ -128,11 +128,11 @@ export async function addTrackToPlaylist(req, res) {
 		} else {
 			playlist.trackList.push(track)
 			await playlist.save()
-				.then(async function (newPlaylist) {
+				.then(async function () {
 					return res.status(201).json({
 						success: true,
 						message: ' playlist updated successfully',
-						playlist: newPlaylist,
+						playlist: playlist,
 					});
 				})
 				.catch((error) => {

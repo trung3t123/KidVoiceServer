@@ -17,7 +17,7 @@ const auth = async (req, res, next) => {
 
 		const userDetails = {
 			_id: user._id,
-			userPhone: user.userPhone,
+			userName: user.userName,
 			userMail: user.userMail,
 		}
 		req.user = userDetails

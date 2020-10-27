@@ -5,12 +5,12 @@ import { createPlaylist, getAllUserPlaylist, getPlaylist, getAllPlaylist } from 
 const trackRoute = express.Router();
 
 trackRoute.get('/openTrack/:trackID', openTrack);
-trackRoute.post('/',postTrack);
+trackRoute.post('/postTrack',postTrack);
 trackRoute.get('/allTracks',getAllTracks);
 trackRoute.post('/createPlaylist',createPlaylist);
-trackRoute.get('/getAllUserPlaylist',getAllUserPlaylist);
+trackRoute.post('/getAllUserPlaylist',getAllUserPlaylist);
 trackRoute.post('/addTrackToPlaylist',addTrackToPlaylist);
-trackRoute.get('/getPlaylist',getPlaylist);
+trackRoute.post('/getPlaylist',getPlaylist);
 trackRoute.get('/getAllPlaylist',getAllPlaylist);
 
 

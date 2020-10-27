@@ -44,9 +44,8 @@ export async function getPlaylist(req, res) {
 		const playlist = await Playlist.findOne({ _id: req.body.playlistId }).populate('trackList');
 		res.send(playlist);
 	} catch (error) {
-		res.send(error)
+		res.send({error : error})
 	}
-
 }
 
 
@@ -80,5 +79,4 @@ export async function getAllPlaylist(req, res) {
 				error: err.message,
 			});
 		})
-	res.send(user);
 }
