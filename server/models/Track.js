@@ -12,6 +12,9 @@ const trackSchema = new mongoose.Schema({
     type: String,
     // required : true
   },
+  trackImage: {
+    type: String,
+  },
   title: {
     type: String,
     required: true,
@@ -20,7 +23,7 @@ const trackSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  duration : {
+  duration: {
     type: String,
     required: true,
   },
