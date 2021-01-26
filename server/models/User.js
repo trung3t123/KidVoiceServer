@@ -35,6 +35,12 @@ const userSchema = new mongoose.Schema({
       },
     },
   ],
+  books: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Book",
+    },
+  ],
 });
 
 userSchema.methods.generateAuthToken = async function () {

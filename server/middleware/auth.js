@@ -18,6 +18,8 @@ const auth = async (req, res, next) => {
       _id: user._id,
       userName: user.userName,
       userMail: user.userMail,
+      userBooks: user.books,
+      playlist: user.playlist,
     };
     req.user = userDetails;
     req.token = token;

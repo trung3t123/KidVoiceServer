@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
-import Axios from "axios";
 import multer from "multer";
 import { Readable } from "stream";
 import Track from "./../models/Track.js";
 import Playlist from "../models/Playlist.js";
+import { createWriteStream } from "fs";
 const ObjectID = mongoose.mongo.ObjectID;
 const database = mongoose.connection;
 
@@ -38,6 +37,30 @@ export async function openTrack(req, res) {
   downloadStream.on("end", () => {
     res.end();
   });
+}
+
+export async function getTrackListPage(req, res) {
+  let viewedCount = 5 * (req.params.page - 1);
+  let currentResultInPage = 5;
+
+  Track.find()
+    .select("_id title artist trackImage")
+    .skip(viewedCount)
+    .limit(currentResultInPage)
+    .then((allTracks) => {
+      return res.status(200).json({
+        success: true,
+        message: "A list of all Books",
+        tracks: allTracks,
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        success: false,
+        message: "Server error. Please try again.",
+        error: err.message,
+      });
+    });
 }
 
 export async function getTrackImage(req, res) {
@@ -77,7 +100,7 @@ export async function upTrack(req, res) {
   const storage = multer.memoryStorage();
   const upload = multer({
     storage: storage,
-    limits: { fileSize: 6000000, files: 10 },
+    limits: { fileSize: 6000000000, files: 10 },
   });
 
   upload.any()(req, res, (err) => {
@@ -149,75 +172,56 @@ export async function upTrack(req, res) {
   });
 }
 
-export async function postTrack(req, res) {
-  const storage = multer.memoryStorage();
-  const upload = multer({
-    storage: storage,
-    limits: { fileSize: 6000000, files: 1 },
+export async function downloadTrack(req, res) {
+  try {
+    var trackID = new ObjectID(req.params.trackID);
+  } catch (err) {
+    return res.status(400).json({
+      message:
+        "Invalid trackID in URL parameter. Must be a single String of 12 bytes or a string of 24 hex characters",
+    });
+  }
+  let db = database.db;
+
+  let bucket = new mongoose.mongo.GridFSBucket(db, {
+    bucketName: "Track",
   });
-  upload.single("Track")(req, res, (err) => {
-    if (err) {
-      console.log("error", err);
-      return res
-        .status(400)
-        .json({ message: "Upload Request Validation Failed" });
-    } else if (!req.body.title) {
-      return res.status(400).json({ message: "No track name in request body" });
-    }
 
-    let trackName = req.body.title;
-    console.log("file Mp3", req.file);
+  let downloadStream = bucket
+    .openDownloadStream(trackID)
+    .pipe(createWriteStream(trackID + ".mp3"));
 
-    // Covert buffer to Readable Stream
-    const readableTrackStream = new Readable();
-    readableTrackStream.push(req.file.buffer);
-    readableTrackStream.push(null);
-    let db = database.db;
-    let bucket = new mongoose.mongo.GridFSBucket(db, {
-      bucketName: "Track",
-    });
-
-    let uploadStream = bucket.openUploadStream(trackName);
-    let id = uploadStream.id;
-    readableTrackStream.pipe(uploadStream);
-
-    uploadStream.on("error", () => {
-      return res.status(500).json({ message: "Error uploading file" });
-    });
-
-    uploadStream.on("finish", () => {
-      const track = new Track({
-        _id: id,
-        title: req.body.title,
-        artist: req.body.artist,
-        duration: req.body.duration,
-      });
-      return track
-        .save()
-        .then(async function (newTrack) {
-          return res.status(201).json({
-            success: true,
-            message: "New track created successfully",
-            track: newTrack,
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-          res.status(500).json({
-            success: false,
-            message: "Server error. Please try again.",
-            error: error.message,
-            loggedIn: false,
-          });
-        });
-    });
+  console.log("content", res);
+  let receivedBytes = 0;
+  downloadStream.on("data", (chunk) => {
+    console.log("chunk", chunk);
   });
-  // console.log('db', db);
+
+  downloadStream.on("finish", () => {
+    console.log("done downloading");
+    //process.exit(0);
+    res.send("done Download");
+  });
+
+  downloadStream.on("error", () => {
+    res.sendStatus(404);
+  });
+
+  downloadStream.on("end", () => {
+    res.end();
+  });
 }
 
 export async function getAllTracks(req, res) {
+
+  let viewedCount = 5 * (req.params.page - 1);
+  let currentResultInPage = 5;
+
+
   Track.find()
     .select("_id title trackImage artist duration album genre date playlist")
+    .skip(viewedCount)
+    .limit(currentResultInPage)
     .then((allTracks) => {
       return res.status(200).json({
         success: true,
@@ -233,6 +237,7 @@ export async function getAllTracks(req, res) {
       });
     });
 }
+
 export async function addTrackToPlaylist(req, res) {
   try {
     const track = await Track.findOne({ _id: req.body.trackId });

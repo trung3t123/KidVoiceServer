@@ -4,6 +4,8 @@ import mongoose from "mongoose";
 import logger from "morgan";
 import mainRoutes from "./server/routes/main.js";
 import trackRoute from "./server/routes/tracks.js";
+import bookRoute from "./server/routes/book.js";
+
 // set up dependencies
 const app = express();
 app.use(bodyParser.json());
@@ -30,6 +32,7 @@ app.get("/", (req, res) => {
   });
 });
 // set up route
+app.use("/books", bookRoute);
 app.use("/tracks", trackRoute);
 app.use("/api/", mainRoutes);
 

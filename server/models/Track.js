@@ -36,6 +36,10 @@ const trackSchema = new mongoose.Schema({
   date: {
     type: String,
   },
+  book: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Book",
+  },
 });
 
 const Track = mongoose.model("Track", trackSchema);

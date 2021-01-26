@@ -54,12 +54,30 @@ export async function getAllUserPlaylist(req, res) {
     console.log("userId", req.body.userId);
     const user = await User.findOne({ _id: req.body.userId }).populate(
       "playlist"
-    );
-    res.send(user);
+    ).then((user) => {
+      return res.status(200).json({
+        success: true,
+        message: "A list of playlist",
+        playlist: user.playlist,
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        success: false,
+        message: "Server error. Please try again.",
+        error: err.message,
+      });
+    });
   } catch (error) {
-    res.send(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error. Please try again.",
+      error: err.message,
+    });
   }
 }
+
+
 
 export async function getAllPlaylist(req, res) {
   Playlist.find()

@@ -1,7 +1,7 @@
 import express from 'express';
 import { createUser, getAllUser, loginUser, getMyUserProfile, logoutAccount, loginFacebook, } from '../controller/User.js';
 import auth, { authFacebook } from '../middleware/auth.js';
-const mainRoutes = express.Router();
+const  mainRoutes = express.Router();
 
 mainRoutes.post('/user', createUser);
 mainRoutes.get('/users', getAllUser);
