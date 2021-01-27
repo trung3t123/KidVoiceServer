@@ -246,3 +246,26 @@ export async function downloadBook(req, res) {
     res.end();
   });
 }
+
+
+export async function searchBook(req, res) {
+  const query = { bookName: { $regex: req.params.text, $options: "i" } };
+  console.log('text',req.params.text);
+  try {
+    Book.find(query).then((data) => {
+      console.log("data", data);
+      return res.status(200).json({
+        success: true,
+        message: "books",
+        books: data,
+      });
+    });
+  } catch (error) {
+    console.log("error", error);
+    return res.status(500).json({
+      success: false,
+      message: " playlist updated successfully",
+      books: error,
+    });
+  }
+}

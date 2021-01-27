@@ -10,6 +10,9 @@ const userSchema = new mongoose.Schema({
   userName: {
     type: String,
   },
+  enrolled: {
+    type: Boolean,
+  },
   userPassword: {
     type: String,
   },

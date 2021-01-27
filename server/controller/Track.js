@@ -213,10 +213,8 @@ export async function downloadTrack(req, res) {
 }
 
 export async function getAllTracks(req, res) {
-
   let viewedCount = 5 * (req.params.page - 1);
   let currentResultInPage = 5;
-
 
   Track.find()
     .select("_id title trackImage artist duration album genre date playlist")
@@ -236,6 +234,28 @@ export async function getAllTracks(req, res) {
         error: err.message,
       });
     });
+}
+
+export async function searchTrack(req, res) {
+  const query = { title: { $regex: req.params.text, $options: "i" } };
+
+  try {
+    Track.find(query).then((data) => {
+      console.log("data", data);
+      return res.status(200).json({
+        success: true,
+        message: "tracks",
+        track: data,
+      });
+    });
+  } catch (error) {
+    console.log("error", error);
+    return res.status(500).json({
+      success: false,
+      message: " playlist updated successfully",
+      track: error,
+    });
+  }
 }
 
 export async function addTrackToPlaylist(req, res) {
